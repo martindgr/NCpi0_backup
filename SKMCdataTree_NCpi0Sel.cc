@@ -108,9 +108,9 @@ int main(int argc, char* argv[]){
   } SelType;
 	
 
-    //SelType sel = _1dcyePi0;
+    SelType sel = _1dcyePi0;
     //SelType sel = _1RePi0;
-    SelType sel = NCPi0;
+    //SelType sel = NCPi0;
     //SelType sel = noemupid;
     SKMCdataTree m(ch_files);
 	  m.AddFileFlavorInt(fileFlavor);

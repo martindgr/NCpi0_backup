@@ -580,16 +580,9 @@ void SKMCdataTree::LoopNCHistos(std::string horn_current, std::string osc_sample
 		//printf("%f,  %f, %d \n", flux_weight, pot_weight,fileFlavorInt[jentry]);
 
 //		printf("1: %d, 2: %d \n", mainEventIndex, secondEventIndex);
-    	float x = fq1rpos[mainEventIndex][1][0];
-    	float y = fq1rpos[mainEventIndex][1][1];
-    	float z = fq1rpos[mainEventIndex][1][2];
-		float dx = fq1rdir[mainEventIndex][1][0];
-		float dy = fq1rdir[mainEventIndex][1][1];
-		float dz = fq1rdir[mainEventIndex][1][2];
 
-		ev_towall = ComputeToWall(x, y, z, dx, dy, dz);
-
-    	ev_dwall =  ComputeDWall(x, y, z);
+    	ev_dwall =  GetRecoDWall_pi0();
+      ev_towall = GetRecoToWall_pi0();
 		
 		float EcosBeam = ComputeCosBeam(mainEventIndex, ELECTRON);
 		float Erec = ComputeErec(fq1rmom[mainEventIndex][ELECTRON], ELECTRON, EcosBeam);
@@ -673,7 +666,18 @@ void SKMCdataTree::LoopNCHistos(std::string horn_current, std::string osc_sample
 		//1 ring pi0 like selection	
 		//FC
     if (sel == _1RePi0){
+
+    	float x = fq1rpos[mainEventIndex][1][0];
+    	float y = fq1rpos[mainEventIndex][1][1];
+    	float z = fq1rpos[mainEventIndex][1][2];
+		  float dx = fq1rdir[mainEventIndex][1][0];
+		  float dy = fq1rdir[mainEventIndex][1][1];
+		  float dz = fq1rdir[mainEventIndex][1][2];
+
+		  ev_towall = ComputeToWall(x, y, z, dx, dy, dz);
+    	ev_dwall =  ComputeDWall(x, y, z);
       AddEventToHisto(0, weight);
+      
       if (nhitac < 16 and  evclass==1 and fq1rmom[mainEventIndex][1]>30.){
         nFC += weight;
         AddEventToHisto(1, weight);
@@ -931,6 +935,10 @@ void SKMCdataTree::LoopNCHistos(std::string horn_current, std::string osc_sample
       nllr_pi0mom_2Ree_histo[Cut][Hist]->Write();
       pi0mom_histo[Cut][Hist]->Write();
       fqpi0nll_1D_histo[Cut][Hist]->Write();
+      pi0momR1_histo[Cut][Hist]->Write();
+      pi0momR2_histo[Cut][Hist]->Write();
+      fqtotq_histo[Cut][Hist]->Write();
+      nllr_ee_pi0_histo[Cut][Hist]->Write();
 
 		}
 	}
@@ -1013,430 +1021,6 @@ void SKMCdataTree::InitNCHistos()
 	int NBinsy = 0;
 	double lo_y = 0;
 	double hi_y = 0;
-/*	
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 100;
-		nhitac_histo[i][0] = new TH1D (Form("CCqe_nhitac_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		nhitac_histo[i][1] = new TH1D (Form("CC1pi_nhitac_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		nhitac_histo[i][2] = new TH1D (Form("CCCoh_nhitac_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		nhitac_histo[i][3] = new TH1D (Form("CCmultipi_nhitac_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		nhitac_histo[i][4] = new TH1D (Form("CCDis_nhitac_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		nhitac_histo[i][5] = new TH1D (Form("NC1pi0_nhitac_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		nhitac_histo[i][6] = new TH1D (Form("NC1pipm_nhitac_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		nhitac_histo[i][7] = new TH1D (Form("NCCoh_nhitac_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		nhitac_histo[i][8] = new TH1D (Form("NCOther_nhitac_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		nhitac_histo[i][9] = new TH1D (Form("CC2p2h_nhitac_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		nhitac_histo[i][10] = new TH1D (Form("NC1gamma_nhitac_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		nhitac_histo[i][11] = new TH1D (Form("CCmisc_nhitac_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 1000;
-		evis_histo[i][0] = new TH1F (Form("CCqe_evis_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		evis_histo[i][1] = new TH1F (Form("CC1pi_evis_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		evis_histo[i][2] = new TH1F (Form("CCCoh_evis_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		evis_histo[i][3] = new TH1F (Form("CCmultipi_evis_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		evis_histo[i][4] = new TH1F (Form("CCDis_evis_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		evis_histo[i][5] = new TH1F (Form("NC1pi0_evis_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		evis_histo[i][6] = new TH1F (Form("NC1pipm_evis_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		evis_histo[i][7] = new TH1F (Form("NCCoh_evis_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		evis_histo[i][8] = new TH1F (Form("NCOther_evis_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		evis_histo[i][9] = new TH1F (Form("CC2p2h_evis_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		evis_histo[i][10] = new TH1F (Form("NC1gamma_evis_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		evis_histo[i][11] = new TH1F (Form("CCmisc_evis_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-
-
-		NBins = 200;
-		lo_x = 0;
-		hi_x = 3700;
-		towall_histo[i][0] = new TH1F (Form("CCqe_towall_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		towall_histo[i][1] = new TH1F (Form("CC1pi_towall_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		towall_histo[i][2] = new TH1F (Form("CCCoh_towall_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		towall_histo[i][3] = new TH1F (Form("CCmultipi_towall_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		towall_histo[i][4] = new TH1F (Form("CCDis_towall_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		towall_histo[i][5] = new TH1F (Form("NC1pi0_towall_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		towall_histo[i][6] = new TH1F (Form("NC1pipm_towall_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		towall_histo[i][7] = new TH1F (Form("NCCoh_towall_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		towall_histo[i][8] = new TH1F (Form("NCOther_towall_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		towall_histo[i][9] = new TH1F (Form("CC2p2h_towall_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		towall_histo[i][10] = new TH1F (Form("NC1gamma_towall_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		towall_histo[i][11] = new TH1F (Form("CCmisc_towall_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-
-		NBins = 200;
-		lo_x = 0;
-		hi_x = 1600;
-		dwall_histo[i][0] = new TH1F (Form("CCqe_dwall_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		dwall_histo[i][1] = new TH1F (Form("CC1pi_dwall_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		dwall_histo[i][2] = new TH1F (Form("CCCoh_dwall_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		dwall_histo[i][3] = new TH1F (Form("CCmultipi_dwall_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		dwall_histo[i][4] = new TH1F (Form("CCDis_dwall_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		dwall_histo[i][5] = new TH1F (Form("NC1pi0_dwall_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		dwall_histo[i][6] = new TH1F (Form("NC1pipm_dwall_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		dwall_histo[i][7] = new TH1F (Form("NCCoh_dwall_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		dwall_histo[i][8] = new TH1F (Form("NCOther_dwall_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		dwall_histo[i][9] = new TH1F (Form("CC2p2h_dwall_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		dwall_histo[i][10] = new TH1F (Form("NC1gamma_dwall_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		dwall_histo[i][11] = new TH1F (Form("CCmisc_dwall_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-
-		NBins = 6;
-		lo_x = 0;
-		hi_x = 6;
-		pid1_histo[i][0] = new TH1D (Form("CCqe_pid1_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		pid1_histo[i][1] = new TH1D (Form("CC1pi_pid1_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		pid1_histo[i][2] = new TH1D (Form("CCCoh_pid1_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		pid1_histo[i][3] = new TH1D (Form("CCmultipi_pid1_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		pid1_histo[i][4] = new TH1D (Form("CCDis_pid1_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		pid1_histo[i][5] = new TH1D (Form("NC1pi0_pid1_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		pid1_histo[i][6] = new TH1D (Form("NC1pipm_pid1_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		pid1_histo[i][7] = new TH1D (Form("NCCoh_pid1_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		pid1_histo[i][8] = new TH1D (Form("NCOther_pid1_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		pid1_histo[i][9] = new TH1D (Form("CC2p2h_pid1_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		pid1_histo[i][10] = new TH1D (Form("NC1gamma_pid1_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		pid1_histo[i][11] = new TH1D (Form("CCmisc_pid1_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-	
-		NBins = 6;
-		lo_x = 0;
-		hi_x = 6;
-		pid2_histo[i][0] = new TH1D (Form("CCqe_pid2_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		pid2_histo[i][1] = new TH1D (Form("CC1pi_pid2_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		pid2_histo[i][2] = new TH1D (Form("CCCoh_pid2_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		pid2_histo[i][3] = new TH1D (Form("CCmultipi_pid2_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		pid2_histo[i][4] = new TH1D (Form("CCDis_pid2_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		pid2_histo[i][5] = new TH1D (Form("NC1pi0_pid2_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		pid2_histo[i][6] = new TH1D (Form("NC1pipm_pid2_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		pid2_histo[i][7] = new TH1D (Form("NCCoh_pid2_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		pid2_histo[i][8] = new TH1D (Form("NCOther_pid2_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		pid2_histo[i][9] = new TH1D (Form("CC2p2h_pid2_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		pid2_histo[i][10] = new TH1D (Form("NC1gamma_pid2_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		pid2_histo[i][11] = new TH1D (Form("CCmisc_pid2_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-	
-		NBins = 200;
-		lo_x = -2000;
-		hi_x = 3000;
-		fq1Remunll_histo[i][0] = new TH1F (Form("CCqe_fq1Remunll_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		fq1Remunll_histo[i][1] = new TH1F (Form("CC1pi_fq1Remunll_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		fq1Remunll_histo[i][2] = new TH1F (Form("CCCoh_fq1Remunll_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		fq1Remunll_histo[i][3] = new TH1F (Form("CCmultipi_fq1Remunll_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		fq1Remunll_histo[i][4] = new TH1F (Form("CCDis_fq1Remunll_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		fq1Remunll_histo[i][5] = new TH1F (Form("NC1pi0_fq1Remunll_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		fq1Remunll_histo[i][6] = new TH1F (Form("NC1pipm_fq1Remunll_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		fq1Remunll_histo[i][7] = new TH1F (Form("NCCoh_fq1Remunll_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		fq1Remunll_histo[i][8] = new TH1F (Form("NCOther_fq1Remunll_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		fq1Remunll_histo[i][9] = new TH1F (Form("CC2p2h_fq1Remunll_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		fq1Remunll_histo[i][10] = new TH1F (Form("NC1gamma_fq1Remunll_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		fq1Remunll_histo[i][11] = new TH1F (Form("CCmisc_fq1Remunll_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-		
-    NBins = 6;
-		lo_x = 0;
-		hi_x = 6;
-		fqnse_histo[i][0] = new TH1D (Form("CCqe_fqnse_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		fqnse_histo[i][1] = new TH1D (Form("CC1pi_fqnse_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		fqnse_histo[i][2] = new TH1D (Form("CCCoh_fqnse_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		fqnse_histo[i][3] = new TH1D (Form("CCmultipi_fqnse_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		fqnse_histo[i][4] = new TH1D (Form("CCDis_fqnse_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		fqnse_histo[i][5] = new TH1D (Form("NC1pi0_fqnse_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		fqnse_histo[i][6] = new TH1D (Form("NC1pipm_fqnse_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		fqnse_histo[i][7] = new TH1D (Form("NCCoh_fqnse_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		fqnse_histo[i][8] = new TH1D (Form("NCOther_fqnse_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		fqnse_histo[i][9] = new TH1D (Form("CC2p2h_fqnse_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		fqnse_histo[i][10] = new TH1D (Form("NC1gamma_fqnse_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		fqnse_histo[i][11] = new TH1D (Form("CCmisc_fqnse_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 1500;
-		fq1rmom_histo[i][0] = new TH1F (Form("CCqe_fq1rmom_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		fq1rmom_histo[i][1] = new TH1F (Form("CC1pi_fq1rmom_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		fq1rmom_histo[i][2] = new TH1F (Form("CCCoh_fq1rmom_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		fq1rmom_histo[i][3] = new TH1F (Form("CCmultipi_fq1rmom_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		fq1rmom_histo[i][4] = new TH1F (Form("CCDis_fq1rmom_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		fq1rmom_histo[i][5] = new TH1F (Form("NC1pi0_fq1rmom_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		fq1rmom_histo[i][6] = new TH1F (Form("NC1pipm_fq1rmom_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		fq1rmom_histo[i][7] = new TH1F (Form("NCCoh_fq1rmom_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		fq1rmom_histo[i][8] = new TH1F (Form("NCOther_fq1rmom_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		fq1rmom_histo[i][9] = new TH1F (Form("CC2p2h_fq1rmom_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		fq1rmom_histo[i][10] = new TH1F (Form("NC1gamma_fq1rmom_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		fq1rmom_histo[i][11] = new TH1F (Form("CCmisc_fq1rmom_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-	
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 5000;	
-		Erec_histo[i][0] = new TH1F (Form("CCqe_Erec_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		Erec_histo[i][1] = new TH1F (Form("CC1pi_Erec_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		Erec_histo[i][2] = new TH1F (Form("CCCoh_Erec_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		Erec_histo[i][3] = new TH1F (Form("CCmultipi_Erec_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		Erec_histo[i][4] = new TH1F (Form("CCDis_Erec_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		Erec_histo[i][5] = new TH1F (Form("NC1pi0_Erec_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		Erec_histo[i][6] = new TH1F (Form("NC1pipm_Erec_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		Erec_histo[i][7] = new TH1F (Form("NCCoh_Erec_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		Erec_histo[i][8] = new TH1F (Form("NCOther_Erec_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		Erec_histo[i][9] = new TH1F (Form("CC2p2h_Erec_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		Erec_histo[i][10] = new TH1F (Form("NC1gamma_Erec_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		Erec_histo[i][11] = new TH1F (Form("CCmisc_Erec_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-		
-		NBins = 6;
-		lo_x = 0;
-		hi_x = 6;
-		nring_histo[i][0] = new TH1D (Form("CCqe_nring_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		nring_histo[i][1] = new TH1D (Form("CC1pi_nring_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		nring_histo[i][2] = new TH1D (Form("CCCoh_nring_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		nring_histo[i][3] = new TH1D (Form("CCmultipi_nring_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		nring_histo[i][4] = new TH1D (Form("CCDis_nring_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		nring_histo[i][5] = new TH1D (Form("NC1pi0_nring_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		nring_histo[i][6] = new TH1D (Form("NC1pipm_nring_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		nring_histo[i][7] = new TH1D (Form("NCCoh_nring_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		nring_histo[i][8] = new TH1D (Form("NCOther_nring_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		nring_histo[i][9] = new TH1D (Form("CC2p2h_nring_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		nring_histo[i][10] = new TH1D (Form("NC1gamma_nring_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		nring_histo[i][11] = new TH1D (Form("CCmisc_nring_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-
-		
-		NBins = 50;
-		lo_x = 300;
-		hi_x = 600;
-		NBinsy = 50;
-		lo_y = -500;
-		hi_y = 500; 
-    fqpi0nll_highmass_histo[i][0] = new TH2F (Form("CCqe_fqpi0nll_highmass_histo_%d", i), "CCqe", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_highmass_histo[i][1] = new TH2F (Form("CC1pi_fqpi0nll_highmass_histo_%d", i), "CC1pi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_highmass_histo[i][2] = new TH2F (Form("CCCoh_fqpi0nll_highmass_histo_%d", i), "CCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_highmass_histo[i][3] = new TH2F (Form("CCmultipi_fqpi0nll_highmass_histo_%d", i), "CCmultipi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_highmass_histo[i][4] = new TH2F (Form("CCDis_fqpi0nll_highmass_histo_%d", i), "CCDis", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_highmass_histo[i][5] = new TH2F (Form("NC1pi0_fqpi0nll_highmass_histo_%d", i), "NC1pi0", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_highmass_histo[i][6] = new TH2F (Form("NC1pipm_fqpi0nll_highmass_histo_%d", i), "NC1pipm", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_highmass_histo[i][7] = new TH2F (Form("NCCoh_fqpi0nll_highmass_histo_%d", i), "NCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_highmass_histo[i][8] = new TH2F (Form("NCOther_fqpi0nll_highmass_histo_%d", i), "NCOther", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_highmass_histo[i][9] = new TH2F (Form("CC2p2h_fqpi0nll_highmass_histo_%d", i), "CC2p2h", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_highmass_histo[i][10] = new TH2F (Form("NC1gamma_fqpi0nll_highmass_histo_%d", i), "NC1gamma", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_highmass_histo[i][11] = new TH2F (Form("CCmisc_fqpi0nll_highmass_histo_%d", i), "CCmisc", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		
-	
-    
-		
-		NBins = 50;
-		lo_x = 0;
-		hi_x = 300;
-		NBinsy = 50;
-		lo_y = 0;
-		hi_y = 1000; 
-    fqpi0nll_histo[i][0] = new TH2F (Form("CCqe_fqpi0nll_histo_%d", i), "CCqe", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_histo[i][1] = new TH2F (Form("CC1pi_fqpi0nll_histo_%d", i), "CC1pi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_histo[i][2] = new TH2F (Form("CCCoh_fqpi0nll_histo_%d", i), "CCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_histo[i][3] = new TH2F (Form("CCmultipi_fqpi0nll_histo_%d", i), "CCmultipi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_histo[i][4] = new TH2F (Form("CCDis_fqpi0nll_histo_%d", i), "CCDis", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_histo[i][5] = new TH2F (Form("NC1pi0_fqpi0nll_histo_%d", i), "NC1pi0", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_histo[i][6] = new TH2F (Form("NC1pipm_fqpi0nll_histo_%d", i), "NC1pipm", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_histo[i][7] = new TH2F (Form("NCCoh_fqpi0nll_histo_%d", i), "NCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_histo[i][8] = new TH2F (Form("NCOther_fqpi0nll_histo_%d", i), "NCOther", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_histo[i][9] = new TH2F (Form("CC2p2h_fqpi0nll_histo_%d", i), "CC2p2h", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_histo[i][10] = new TH2F (Form("NC1gamma_fqpi0nll_histo_%d", i), "NC1gamma", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		fqpi0nll_histo[i][11] = new TH2F (Form("CCmisc_fqpi0nll_histo_%d", i), "CCmisc", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-
-
-
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 700;
-		fqpi0mass_histo[i][0] = new TH1F (Form("CCqe_fqpi0mass_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		fqpi0mass_histo[i][1] = new TH1F (Form("CC1pi_fqpi0mass_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		fqpi0mass_histo[i][2] = new TH1F (Form("CCCoh_fqpi0mass_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		fqpi0mass_histo[i][3] = new TH1F (Form("CCmultipi_fqpi0mass_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		fqpi0mass_histo[i][4] = new TH1F (Form("CCDis_fqpi0mass_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		fqpi0mass_histo[i][5] = new TH1F (Form("NC1pi0_fqpi0mass_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		fqpi0mass_histo[i][6] = new TH1F (Form("NC1pipm_fqpi0mass_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		fqpi0mass_histo[i][7] = new TH1F (Form("NCCoh_fqpi0mass_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		fqpi0mass_histo[i][8] = new TH1F (Form("NCOther_fqpi0mass_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		fqpi0mass_histo[i][9] = new TH1F (Form("CC2p2h_fqpi0mass_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		fqpi0mass_histo[i][10] = new TH1F (Form("NC1gamma_fqpi0mass_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		fqpi0mass_histo[i][11] = new TH1F (Form("CCmisc_fqpi0mass_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 10;
-		trueE_histo[i][0] = new TH1F (Form("CCqe_trueE_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		trueE_histo[i][1] = new TH1F (Form("CC1pi_trueE_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		trueE_histo[i][2] = new TH1F (Form("CCCoh_trueE_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		trueE_histo[i][3] = new TH1F (Form("CCmultipi_trueE_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		trueE_histo[i][4] = new TH1F (Form("CCDis_trueE_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		trueE_histo[i][5] = new TH1F (Form("NC1pi0_trueE_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		trueE_histo[i][6] = new TH1F (Form("NC1pipm_trueE_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		trueE_histo[i][7] = new TH1F (Form("NCCoh_trueE_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		trueE_histo[i][8] = new TH1F (Form("NCOther_trueE_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		trueE_histo[i][9] = new TH1F (Form("CC2p2h_trueE_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		trueE_histo[i][10] = new TH1F (Form("NC1gamma_trueE_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		trueE_histo[i][11] = new TH1F (Form("CCmisc_trueE_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-	
-
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 10;
-		Q2_histo[i][0] = new TH1F (Form("CCqe_Q2_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		Q2_histo[i][1] = new TH1F (Form("CC1pi_Q2_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		Q2_histo[i][2] = new TH1F (Form("CCCoh_Q2_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		Q2_histo[i][3] = new TH1F (Form("CCmultipi_Q2_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		Q2_histo[i][4] = new TH1F (Form("CCDis_Q2_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		Q2_histo[i][5] = new TH1F (Form("NC1pi0_Q2_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		Q2_histo[i][6] = new TH1F (Form("NC1pipm_Q2_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		Q2_histo[i][7] = new TH1F (Form("NCCoh_Q2_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		Q2_histo[i][8] = new TH1F (Form("NCOther_Q2_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		Q2_histo[i][9] = new TH1F (Form("CC2p2h_Q2_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		Q2_histo[i][10] = new TH1F (Form("NC1gamma_Q2_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		Q2_histo[i][11] = new TH1F (Form("CCmisc_Q2_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-		
-		
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 1500;
-		apfitEvis_histo[i][0] = new TH1F (Form("CCqe_apfitEvis_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		apfitEvis_histo[i][1] = new TH1F (Form("CC1pi_apfitEvis_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		apfitEvis_histo[i][2] = new TH1F (Form("CCCoh_apfitEvis_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		apfitEvis_histo[i][3] = new TH1F (Form("CCmultipi_apfitEvis_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		apfitEvis_histo[i][4] = new TH1F (Form("CCDis_apfitEvis_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		apfitEvis_histo[i][5] = new TH1F (Form("NC1pi0_apfitEvis_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		apfitEvis_histo[i][6] = new TH1F (Form("NC1pipm_apfitEvis_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		apfitEvis_histo[i][7] = new TH1F (Form("NCCoh_apfitEvis_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		apfitEvis_histo[i][8] = new TH1F (Form("NCOther_apfitEvis_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		apfitEvis_histo[i][9] = new TH1F (Form("CC2p2h_apfitEvis_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		apfitEvis_histo[i][10] = new TH1F (Form("NC1gamma_apfitEvis_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		apfitEvis_histo[i][11] = new TH1F (Form("CCmisc_apfitEvis_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-		
-		
-		
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 2500;
-		NBinsy = 100;
-		lo_y = -1.0;
-		hi_y = 1.0;
-		
-		mom_dir_histo[i][0] = new TH2F (Form("CCqe_mom_dir_histo_%d", i), "CCqe", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		mom_dir_histo[i][1] = new TH2F (Form("CC1pi_mom_dir_histo_%d", i), "CC1pi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		mom_dir_histo[i][2] = new TH2F (Form("CCCoh_mom_dir_histo_%d", i), "CCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		mom_dir_histo[i][3] = new TH2F (Form("CCmultipi_mom_dir_histo_%d", i), "CCmultipi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		mom_dir_histo[i][4] = new TH2F (Form("CCDis_mom_dir_histo_%d", i), "CCDis", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		mom_dir_histo[i][5] = new TH2F (Form("NC1pi0_mom_dir_histo_%d", i), "NC1pi0", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		mom_dir_histo[i][6] = new TH2F (Form("NC1pipm_mom_dir_histo_%d", i), "NC1pipm", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		mom_dir_histo[i][7] = new TH2F (Form("NCCoh_mom_dir_histo_%d", i), "NCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		mom_dir_histo[i][8] = new TH2F (Form("NCOther_mom_dir_histo_%d", i), "NCOther", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		mom_dir_histo[i][9] = new TH2F (Form("CC2p2h_mom_dir_histo_%d", i), "CC2p2h", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		mom_dir_histo[i][10] = new TH2F (Form("NC1gamma_mom_dir_histo_%d", i), "NC1gamma", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		mom_dir_histo[i][11] = new TH2F (Form("CCmisc_mom_dir_histo_%d", i), "CCmisc", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		
-	
-
-		NBins = 200;
-		lo_x = -2000;
-		hi_x = 2000;
-		NBinsy = 200;
-		lo_y = -2000;
-		hi_y = 2000;
-		x_y_histo[i][0] = new TH2F (Form("CCqe_x_y_histo_%d", i), "CCqe", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		x_y_histo[i][1] = new TH2F (Form("CC1pi_x_y_histo_%d", i), "CC1pi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		x_y_histo[i][2] = new TH2F (Form("CCCoh_x_y_histo_%d", i), "CCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		x_y_histo[i][3] = new TH2F (Form("CCmultipi_x_y_histo_%d", i), "CCmultipi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		x_y_histo[i][4] = new TH2F (Form("CCDis_x_y_histo_%d", i), "CCDis", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		x_y_histo[i][5] = new TH2F (Form("NC1pi0_x_y_histo_%d", i), "NC1pi0", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		x_y_histo[i][6] = new TH2F (Form("NC1pipm_x_y_histo_%d", i), "NC1pipm", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		x_y_histo[i][7] = new TH2F (Form("NCCoh_x_y_histo_%d", i), "NCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		x_y_histo[i][8] = new TH2F (Form("NCOther_x_y_histo_%d", i), "NCOther", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		x_y_histo[i][9] = new TH2F (Form("CC2p2h_x_y_histo_%d", i), "CC2p2h", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		x_y_histo[i][10] = new TH2F (Form("NC1gamma_x_y_histo_%d", i), "NC1gamma", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		x_y_histo[i][11] = new TH2F (Form("CCmisc_x_y_histo_%d", i), "CCmisc", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-	
-
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 3E6;
-		NBinsy = 100;
-		lo_y = -2000;
-		hi_y = 2000;
-		r2_z_histo[i][0] = new TH2F (Form("CCqe_r2_z_histo_%d", i), "CCqe", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		r2_z_histo[i][1] = new TH2F (Form("CC1pi_r2_z_histo_%d", i), "CC1pi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		r2_z_histo[i][2] = new TH2F (Form("CCCoh_r2_z_histo_%d", i), "CCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		r2_z_histo[i][3] = new TH2F (Form("CCmultipi_r2_z_histo_%d", i), "CCmultipi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		r2_z_histo[i][4] = new TH2F (Form("CCDis_r2_z_histo_%d", i), "CCDis", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		r2_z_histo[i][5] = new TH2F (Form("NC1pi0_r2_z_histo_%d", i), "NC1pi0", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		r2_z_histo[i][6] = new TH2F (Form("NC1pipm_r2_z_histo_%d", i), "NC1pipm", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		r2_z_histo[i][7] = new TH2F (Form("NCCoh_r2_z_histo_%d", i), "NCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		r2_z_histo[i][8] = new TH2F (Form("NCOther_r2_z_histo_%d", i), "NCOther", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		r2_z_histo[i][9] = new TH2F (Form("CC2p2h_r2_z_histo_%d", i), "CC2p2h", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		r2_z_histo[i][10] = new TH2F (Form("NC1gamma_r2_z_histo_%d", i), "NC1gamma", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		r2_z_histo[i][11] = new TH2F (Form("CCmisc_r2_z_histo_%d", i), "CCmisc", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-	
-	
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 3000;
-		ring_2_mom_histo[i][0] = new TH1F (Form("CCqe_ring_2_mom_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		ring_2_mom_histo[i][1] = new TH1F (Form("CC1pi_ring_2_mom_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		ring_2_mom_histo[i][2] = new TH1F (Form("CCCoh_ring_2_mom_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		ring_2_mom_histo[i][3] = new TH1F (Form("CCmultipi_ring_2_mom_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		ring_2_mom_histo[i][4] = new TH1F (Form("CCDis_ring_2_mom_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		ring_2_mom_histo[i][5] = new TH1F (Form("NC1pi0_ring_2_mom_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		ring_2_mom_histo[i][6] = new TH1F (Form("NC1pipm_ring_2_mom_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		ring_2_mom_histo[i][7] = new TH1F (Form("NCCoh_ring_2_mom_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		ring_2_mom_histo[i][8] = new TH1F (Form("NCOther_ring_2_mom_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		ring_2_mom_histo[i][9] = new TH1F (Form("CC2p2h_ring_2_mom_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		ring_2_mom_histo[i][10] = new TH1F (Form("NC1gamma_ring_2_mom_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		ring_2_mom_histo[i][11] = new TH1F (Form("CCmisc_ring_2_mom_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-	
-
-
-		NBins = 100;
-		lo_x = -1000;
-		hi_x = 1000;
-		nllr_2Rother_ee_histo[i][0] = new TH1F (Form("CCqe_nllr_2Rother_ee_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		nllr_2Rother_ee_histo[i][1] = new TH1F (Form("CC1pi_nllr_2Rother_ee_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		nllr_2Rother_ee_histo[i][2] = new TH1F (Form("CCCoh_nllr_2Rother_ee_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		nllr_2Rother_ee_histo[i][3] = new TH1F (Form("CCmultipi_nllr_2Rother_ee_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		nllr_2Rother_ee_histo[i][4] = new TH1F (Form("CCDis_nllr_2Rother_ee_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		nllr_2Rother_ee_histo[i][5] = new TH1F (Form("NC1pi0_nllr_2Rother_ee_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		nllr_2Rother_ee_histo[i][6] = new TH1F (Form("NC1pipm_nllr_2Rother_ee_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		nllr_2Rother_ee_histo[i][7] = new TH1F (Form("NCCoh_nllr_2Rother_ee_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		nllr_2Rother_ee_histo[i][8] = new TH1F (Form("NCOther_nllr_2Rother_ee_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		nllr_2Rother_ee_histo[i][9] = new TH1F (Form("CC2p2h_nllr_2Rother_ee_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		nllr_2Rother_ee_histo[i][10] = new TH1F (Form("NC1gamma_nllr_2Rother_ee_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		nllr_2Rother_ee_histo[i][11] = new TH1F (Form("CCmisc_nllr_2Rother_ee_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-	
-
-		NBins = 200;
-		lo_x = 0;
-		hi_x = 2000;
-		NBinsy = 200;
-		lo_y = -1000;
-		hi_y = 1000;
-		nllr_pi0mom_2Ree_histo[i][0] = new TH2F (Form("CCqe_pi0mom_2Ree_histo_%d", i), "CCqe", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		nllr_pi0mom_2Ree_histo[i][1] = new TH2F (Form("CC1pi_pi0mom_2Ree_histo_%d", i), "CC1pi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		nllr_pi0mom_2Ree_histo[i][2] = new TH2F (Form("CCCoh_pi0mom_2Ree_histo_%d", i), "CCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		nllr_pi0mom_2Ree_histo[i][3] = new TH2F (Form("CCmultipi_pi0mom_2Ree_histo_%d", i), "CCmultipi", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		nllr_pi0mom_2Ree_histo[i][4] = new TH2F (Form("CCDis_pi0mom_2Ree_histo_%d", i), "CCDis", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		nllr_pi0mom_2Ree_histo[i][5] = new TH2F (Form("NC1pi0_pi0mom_2Ree_histo_%d", i), "NC1pi0", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		nllr_pi0mom_2Ree_histo[i][6] = new TH2F (Form("NC1pipm_pi0mom_2Ree_histo_%d", i), "NC1pipm", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		nllr_pi0mom_2Ree_histo[i][7] = new TH2F (Form("NCCoh_pi0mom_2Ree_histo_%d", i), "NCCoh", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		nllr_pi0mom_2Ree_histo[i][8] = new TH2F (Form("NCOther_pi0mom_2Ree_histo_%d", i), "NCOther", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		nllr_pi0mom_2Ree_histo[i][9] = new TH2F (Form("CC2p2h_pi0mom_2Ree_histo_%d", i), "CC2p2h", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		nllr_pi0mom_2Ree_histo[i][10] = new TH2F (Form("NC1gamma_pi0mom_2Ree_histo_%d", i), "NC1gamma", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-		nllr_pi0mom_2Ree_histo[i][11] = new TH2F (Form("CCmisc_pi0mom_2Ree_histo_%d", i), "CCmisc", NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);
-
-		NBins = 100;
-		lo_x = 0;
-		hi_x = 200;
-		pi0mom_histo[i][0] = new TH1F (Form("CCqe_pi0mom_histo_%d", i), "CCqe",NBins, lo_x, hi_x);
-		pi0mom_histo[i][1] = new TH1F (Form("CC1pi_pi0mom_histo_%d", i), "CC1pi",NBins, lo_x, hi_x);
-		pi0mom_histo[i][2] = new TH1F (Form("CCCoh_pi0mom_histo_%d", i), "CCCoh",NBins, lo_x, hi_x);
-		pi0mom_histo[i][3] = new TH1F (Form("CCmultipi_pi0mom_histo_%d", i), "CCmultipi",NBins, lo_x, hi_x);
-		pi0mom_histo[i][4] = new TH1F (Form("CCDis_pi0mom_histo_%d", i), "CCDis",NBins, lo_x, hi_x);
-		pi0mom_histo[i][5] = new TH1F (Form("NC1pi0_pi0mom_histo_%d", i), "NC1pi0",NBins, lo_x, hi_x);
-		pi0mom_histo[i][6] = new TH1F (Form("NC1pipm_pi0mom_histo_%d", i), "NC1pipm",NBins, lo_x, hi_x);
-		pi0mom_histo[i][7] = new TH1F (Form("NCCoh_pi0mom_histo_%d", i), "NCCoh",NBins, lo_x, hi_x);
-		pi0mom_histo[i][8] = new TH1F (Form("NCOther_pi0mom_histo_%d", i), "NCOther",NBins, lo_x, hi_x);
-		pi0mom_histo[i][9] = new TH1F (Form("CC2p2h_pi0mom_histo_%d", i), "CC2p2h",NBins, lo_x, hi_x);
-		pi0mom_histo[i][10] = new TH1F (Form("NC1gamma_pi0mom_histo_%d", i), "NC1gamma",NBins, lo_x, hi_x);
-		pi0mom_histo[i][11] = new TH1F (Form("CCmisc_pi0mom_histo_%d", i), "CCmisc",NBins, lo_x, hi_x);
-
-}
-*/
   
   for (int i=0; i<numCuts; i++) {
 		NBins = 100;
@@ -1589,8 +1173,28 @@ void SKMCdataTree::InitNCHistos()
 
 		NBins = 100;
 		lo_x = 0;
-		hi_x = 2000;
+		hi_x = 4000;
     for (int j=0; j<numHist; j++) pi0mom_histo[i][j] = new TH1F (Form("%s_pi0mom_histo_%d", varNames[j].c_str(), i), Form("%s", varNames[j].c_str()), NBins, lo_x, hi_x);		
+
+		NBins = 100;
+		lo_x = 0;
+		hi_x = 4000;
+    for (int j=0; j<numHist; j++) pi0momR1_histo[i][j] = new TH1F (Form("%s_pi0momR1_histo_%d", varNames[j].c_str(), i), Form("%s", varNames[j].c_str()), NBins, lo_x, hi_x);		
+		
+    NBins = 100;
+		lo_x = 0;
+		hi_x = 2000;
+    for (int j=0; j<numHist; j++) pi0momR2_histo[i][j] = new TH1F (Form("%s_pi0momR2_histo_%d", varNames[j].c_str(), i), Form("%s", varNames[j].c_str()), NBins, lo_x, hi_x);		
+    
+    NBins = 100;
+		lo_x = 0;
+		hi_x = 100000;
+    for (int j=0; j<numHist; j++) fqtotq_histo[i][j] = new TH1F (Form("%s_fqtotq_histo_%d", varNames[j].c_str(), i), Form("%s", varNames[j].c_str()), NBins, lo_x, hi_x);		
+
+    NBins = 100;
+		lo_x = -1000;
+		hi_x = 1000;
+    for (int j=0; j<numHist; j++) nllr_ee_pi0_histo[i][j] = new TH1F (Form("%s_nllr_ee_pi0_histo_%d", varNames[j].c_str(), i), Form("%s", varNames[j].c_str()), NBins, lo_x, hi_x);		
 
 }
 
@@ -1610,8 +1214,8 @@ void SKMCdataTree::InitNCHistos()
 	
       nhitac_histo[cut][mode]->Fill(nhitac, w);
 			evis_histo[cut][mode]->Fill(fq1rmom[mainEventIndex][1], w);
-			towall_histo[cut][mode]->Fill(this->GetRecoToWall(), w);
-			dwall_histo[cut][mode]->Fill(this->GetRecoDWall(), w);
+			towall_histo[cut][mode]->Fill(this->GetRecoToWall_pi0(), w);
+			dwall_histo[cut][mode]->Fill(this->GetRecoDWall_pi0(), w);
 			nring_histo[cut][mode]->Fill(fqmrnring[0], w);
 			pid1_histo[cut][mode]->Fill(fqmrpid[0][0], w);
 			pid2_histo[cut][mode]->Fill(fqmrpid[0][1], w);
@@ -1633,6 +1237,10 @@ void SKMCdataTree::InitNCHistos()
       nllr_2Rother_ee_histo[cut][mode]->Fill(this->nllr_2Rother_ee(), w);
 			nllr_pi0mom_2Ree_histo[cut][mode]->Fill(fqpi0mass[0], this->nllr_2Rother_ee(), w);
 			pi0mom_histo[cut][mode]->Fill(pi0mom, w);
+			pi0momR1_histo[cut][mode]->Fill(fqpi0mom1[0], w);
+			pi0momR2_histo[cut][mode]->Fill(fqpi0mom2[0], w);
+			fqtotq_histo[cut][mode]->Fill(fqtotq[mainEventIndex], w);
+			nllr_ee_pi0_histo[cut][mode]->Fill(this->nllr_pi0_ee(), w);
 	}
 
 
@@ -1642,7 +1250,7 @@ void SKMCdataTree::AddEventToHisto(int cutID, float w)
  	int mach3mode = 0;	
   double peakLo = 0;
   double peakHi = 300;
-  //mach3mode NCother = 8
+  //mach3mode NCother = 8/
   //Expanded to show more NC background: 8=
 
   
