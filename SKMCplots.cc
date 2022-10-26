@@ -105,6 +105,9 @@ int main(int argc, char ** argv){
   TH1F* pi0mom_histo[NCuts][NVars] = {{0}};
   TH1F* NCbg_histo[NCuts][NVars] = {{0}};
   TH1F* fqpi0nll_1D_histo[NCuts][NVars] = {{0}};
+  TH1F* pi0momR1_histo[NCuts][NVars] = {{0}};
+  TH1F* pi0momR2_histo[NCuts][NVars] = {{0}};
+  TH1F* fqtotq_histo[NCuts][NVars] = {{0}};
   
 
 	THStack *nhitac_stack_hist[NCuts] = {0}; 
@@ -129,6 +132,9 @@ int main(int argc, char ** argv){
 	THStack *NCbg_towall_stack_hist[NCuts] = {0}; 
 	THStack *NCbg_dwall_stack_hist[NCuts] = {0}; 
 	THStack *fqpi0nll_1D_stack_hist[NCuts] = {0}; 
+	THStack *pi0momR1_stack_hist[NCuts] = {0}; 
+	THStack *pi0momR2_stack_hist[NCuts] = {0}; 
+	THStack *fqtotq_stack_hist[NCuts] = {0}; 
 	
 	TH2F* fqpi0nll_sig_hist[NCuts] = {0};
 	TH2F* fqpi0nll_bg_hist[NCuts] = {0};
@@ -159,6 +165,9 @@ int main(int argc, char ** argv){
 		NCbg_towall_stack_hist[i] = new THStack(Form("NCbg_stack_%d", i), "NCbg"); 
 		NCbg_dwall_stack_hist[i] = new THStack(Form("NCbg_stack_%d", i), "NCbg"); 
 		fqpi0nll_1D_stack_hist[i] = new THStack(Form("fqpi0nll_1D_stack_%d", i), "NCbg"); 
+		pi0momR1_stack_hist[i] = new THStack(Form("pi0momR1_stack_%d", i), "R1"); 
+		pi0momR2_stack_hist[i] = new THStack(Form("pi0momR2_stack_%d", i), "R2"); 
+		fqtotq_stack_hist[i] = new THStack(Form("fqtotq_stack_%d", i), "R2"); 
 
 		for (int j=0;j<NVars; j++){
 	//	  printf(	"%s_nhitac_histo_%d\n", AllName[j].c_str(), i);		
@@ -189,6 +198,9 @@ int main(int argc, char ** argv){
 			nllr_2Rother_ee_histo[i][j] = (TH1F*)ifile->Get(Form("%s_nllr_2Rother_ee_histo_%d", AllName[j].c_str(), i));
 			nllr_pi0mom_2Ree_histo[i][j] = (TH2F*)ifile->Get(Form("%s_nllr_pi0mom_2Ree_histo_%d", AllName[j].c_str(), i));
 			pi0mom_histo[i][j] = (TH1F*)ifile->Get(Form("%s_pi0mom_histo_%d", AllName[j].c_str(), i));
+			pi0momR1_histo[i][j] = (TH1F*)ifile->Get(Form("%s_pi0momR1_histo_%d", AllName[j].c_str(), i));
+			pi0momR2_histo[i][j] = (TH1F*)ifile->Get(Form("%s_pi0momR2_histo_%d", AllName[j].c_str(), i));
+			fqtotq_histo[i][j] = (TH1F*)ifile->Get(Form("%s_fqtotq_histo_%d", AllName[j].c_str(), i));
 		}
 	}
 
@@ -377,6 +389,9 @@ int main(int argc, char ** argv){
 				nllr_2Rother_ee_stack_hist[i]->Add(nllr_2Rother_ee_histo[i][DrawReorder[j]]);
 				pi0mom_stack_hist[i]->Add(pi0mom_histo[i][DrawReorder[j]]);
     		fqpi0nll_1D_stack_hist[i]->Add(fqpi0nll_1D_histo[i][DrawReorder[j]]);
+    		pi0momR1_stack_hist[i]->Add(pi0momR1_histo[i][DrawReorder[j]]);
+    		pi0momR2_stack_hist[i]->Add(pi0momR2_histo[i][DrawReorder[j]]);
+    		fqtotq_stack_hist[i]->Add(fqtotq_histo[i][DrawReorder[j]]);
 
 			if ((j == 5) || (j == 7)){
 				fqpi0nll_sig_hist[i]->Add(fqpi0nll_histo[i][j]);
@@ -1163,7 +1178,75 @@ int main(int argc, char ** argv){
 	cfqepi01D9.Update();
 	cfqepi01D9.SaveAs(Form("%scut_%d_epi0PID_1D_%s_%s.pdf", odir.c_str(), DrawCut,  horn_current.c_str(), select.c_str()) );
 
+//ring1 mom
+	DrawCut = 9;
+	TCanvas cpi0momR19("cpi0momR19","pi0momR1_hists",30,10,800,900);
+	gStyle->SetPalette(16, DrawPallette);
+	//gPad->SetLogy();
+//	fqpi0nll_1D_stack_hist[DrawCut]->SetTitle(Form("Cut %d, %s fqmrpid 1 with %s selection", DrawCut, horn_current.c_str(), select.c_str()));
+	pi0momR1_stack_hist[DrawCut]->Draw("hist pfc");
+	//fqpi0nll_1D_stack_hist[DrawCut]->GetXaxis()->SetRange(-400, 400);
+	gPad->BuildLegend(leg_x1,leg_y1,leg_x2,leg_y2,"", "f");
+  pi0momR1_stack_hist[DrawCut]->GetYaxis()->SetTitle("Events");
+  pi0momR1_stack_hist[DrawCut]->GetXaxis()->SetTitle("fqpi0mom1[0]");
+  pi0momR1_stack_hist[DrawCut]->GetYaxis()->SetTitleOffset(1.75);
+  //fqpi0nll_1D_stack_hist[DrawCut]->GetZaxis()->SetRangeUser(0, nll_z_hi);
+  pi0momR1_stack_hist[DrawCut]->SetTitle(Form("%s ln(L_{#pi^0}/L_{e}) ", horn_current.c_str()));
+  pi0momR1_stack_hist[DrawCut]->SetTitle("");
+  //arw1->DrawLine( 100, 0, 100, pi0momR1_stack_hist[DrawCut]->GetMaximum());
+  //arw1->DrawArrow( 100, pi0momR1_stack_hist[DrawCut]->GetMaximum(), 150, fqpi0nll_1D_stack_hist[DrawCut]->GetMaximum(), 0.05, ">");
+	gPad->SetLeftMargin(0.12);
+	gPad->SetRightMargin(0.12);
+	FormatHist(pi0momR1_stack_hist[DrawCut], 1, 2);
+	cpi0momR19.Update();
+	cpi0momR19.SaveAs(Form("%scut_%d_pi0momR1_%s_%s.pdf", odir.c_str(), DrawCut,  horn_current.c_str(), select.c_str()) );
 
+
+//ring2 mom
+	DrawCut = 9;
+	TCanvas cpi0momR29("cpi0momR29","pi0momR2_hists",30,10,800,900);
+	gStyle->SetPalette(16, DrawPallette);
+	//gPad->SetLogy();
+//	fqpi0nll_1D_stack_hist[DrawCut]->SetTitle(Form("Cut %d, %s fqmrpid 1 with %s selection", DrawCut, horn_current.c_str(), select.c_str()));
+	pi0momR2_stack_hist[DrawCut]->Draw("hist pfc");
+	//fqpi0nll_1D_stack_hist[DrawCut]->GetXaxis()->SetRange(-400, 400);
+	gPad->BuildLegend(leg_x1,leg_y1,leg_x2,leg_y2,"", "f");
+  pi0momR2_stack_hist[DrawCut]->GetYaxis()->SetTitle("Events");
+  pi0momR2_stack_hist[DrawCut]->GetXaxis()->SetTitle("fqpi0mom1[0]");
+  pi0momR2_stack_hist[DrawCut]->GetYaxis()->SetTitleOffset(1.75);
+  //fqpi0nll_1D_stack_hist[DrawCut]->GetZaxis()->SetRangeUser(0, nll_z_hi);
+  pi0momR2_stack_hist[DrawCut]->SetTitle(Form("%s ln(L_{#pi^0}/L_{e}) ", horn_current.c_str()));
+  pi0momR2_stack_hist[DrawCut]->SetTitle("");
+  //arw1->DrawLine( 100, 0, 100, pi0momR2_stack_hist[DrawCut]->GetMaximum());
+  //arw1->DrawArrow( 100, pi0momR2_stack_hist[DrawCut]->GetMaximum(), 150, fqpi0nll_1D_stack_hist[DrawCut]->GetMaximum(), 0.05, ">");
+	gPad->SetLeftMargin(0.12);
+	gPad->SetRightMargin(0.12);
+	FormatHist(pi0momR2_stack_hist[DrawCut], 1, 2);
+	cpi0momR29.Update();
+	cpi0momR29.SaveAs(Form("%scut_%d_pi0momR2_%s_%s.pdf", odir.c_str(), DrawCut,  horn_current.c_str(), select.c_str()) );
+
+//deposited charge
+	DrawCut = 9;
+	TCanvas cfqtotq9("cfqtotq9","fqtotq_hists",30,10,800,900);
+	gStyle->SetPalette(16, DrawPallette);
+	gPad->SetLogy();
+//	fqpi0nll_1D_stack_hist[DrawCut]->SetTitle(Form("Cut %d, %s fqmrpid 1 with %s selection", DrawCut, horn_current.c_str(), select.c_str()));
+	fqtotq_stack_hist[DrawCut]->Draw("hist pfc");
+	//fqpi0nll_1D_stack_hist[DrawCut]->GetXaxis()->SetRange(-400, 400);
+	gPad->BuildLegend(leg_x1,leg_y1,leg_x2,leg_y2,"", "f");
+  fqtotq_stack_hist[DrawCut]->GetYaxis()->SetTitle("Events");
+  fqtotq_stack_hist[DrawCut]->GetXaxis()->SetTitle("fqtotq[0]");
+  fqtotq_stack_hist[DrawCut]->GetYaxis()->SetTitleOffset(1.75);
+  //fqpi0nll_1D_stack_hist[DrawCut]->GetZaxis()->SetRangeUser(0, nll_z_hi);
+  //fqtotq_stack_hist[DrawCut]->SetTitle(Form("%s ln(L_{#pi^0}/L_{e}) ", horn_current.c_str()));
+  fqtotq_stack_hist[DrawCut]->SetTitle("");
+  //arw1->DrawLine( 100, 0, 100, fqtotq_stack_hist[DrawCut]->GetMaximum());
+  //arw1->DrawArrow( 100, fqtotq_stack_hist[DrawCut]->GetMaximum(), 150, fqpi0nll_1D_stack_hist[DrawCut]->GetMaximum(), 0.05, ">");
+	gPad->SetLeftMargin(0.12);
+	gPad->SetRightMargin(0.12);
+	FormatHist(fqtotq_stack_hist[DrawCut], 1, 2);
+	cfqtotq9.Update();
+	cfqtotq9.SaveAs(Form("%scut_%d_fqtotq_%s_%s.pdf", odir.c_str(), DrawCut,  horn_current.c_str(), select.c_str()) );
 
 
 
