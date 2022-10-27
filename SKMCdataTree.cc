@@ -1099,8 +1099,8 @@ void SKMCdataTree::InitNCHistos()
     for (int j=0; j<numHist; j++) fqpi0nll_histo[i][j] = new TH2F (Form("%s_fqpi0nll_histo_%d", varNames[j].c_str(), i), Form("%s", varNames[j].c_str()), NBins, lo_x, hi_x, NBinsy, lo_y, hi_y);	
 
 		NBins = 100;
-		lo_x = 0;
-		hi_x = 1000; 
+		lo_x = -200;
+		hi_x = 2000; 
     for (int j=0; j<numHist; j++) fqpi0nll_1D_histo[i][j] = new TH1F (Form("%s_fqpi0nll_1D_histo_%d", varNames[j].c_str(), i), Form("%s", varNames[j].c_str()), NBins, lo_x, hi_x);	
 
 		NBins = 100;
@@ -1192,8 +1192,8 @@ void SKMCdataTree::InitNCHistos()
     for (int j=0; j<numHist; j++) fqtotq_histo[i][j] = new TH1F (Form("%s_fqtotq_histo_%d", varNames[j].c_str(), i), Form("%s", varNames[j].c_str()), NBins, lo_x, hi_x);		
 
     NBins = 100;
-		lo_x = -1000;
-		hi_x = 1000;
+		lo_x = -500;
+		hi_x = 500;
     for (int j=0; j<numHist; j++) nllr_ee_pi0_histo[i][j] = new TH1F (Form("%s_nllr_ee_pi0_histo_%d", varNames[j].c_str(), i), Form("%s", varNames[j].c_str()), NBins, lo_x, hi_x);		
 
 }
